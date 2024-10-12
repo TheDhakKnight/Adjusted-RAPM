@@ -55,7 +55,7 @@ lineup_level_stats <- function(year){
   ##Pulls PBP data for all game ID's in the specified season (takes forever)
   plan(multicore)
   #nba_pbp_raw <- map_df(games, function_pbp)
-  nba_pbp_raw <- map(few_games, function_pbp) %>% list_rbind()
+  nba_pbp_raw <- map(games, function_pbp) %>% list_rbind()
   
   nba_pbp <- nba_pbp_raw %>%
     left_join(player_logs %>%
@@ -508,7 +508,8 @@ lineup_level_stats <- function(year){
   ######################
   ######################
   
-  lineup_stats <- pbp_final_gt %>%
+  if(FALSE){
+    lineup_stats <- pbp_final_gt %>%
     group_by(game_id, slug_team) %>%
     mutate(stint_home = ifelse(slug_team == team_home, cumsum(msg_type == 8) + 1, NA),
            stint_away = ifelse(slug_team == team_away, cumsum(msg_type == 8) + 1, NA)) %>% #keep track of each time subs are made leading to a different 5 player stint
@@ -543,15 +544,16 @@ lineup_level_stats <- function(year){
            poss_team = poss_team + ifelse(lead(zero_secs), lead(poss_team), 0),
            poss_opp = poss_opp + ifelse(lead(zero_secs), lead(poss_opp), 0)) %>% 
     filter(secs_played != 0)
+  }
   
-  return(lineup_stats)
+  return(pbp_final_gt)
 }
 ```
 
 ```{r}
 ##################
 pbp_final_gt <- readRDS("C:/Users/dhaks/OneDrive/Desktop/SMU/STAT 6341/pbp_final_gt.RDS")
-test <- pbp_final_gt %>%
+test <- lineup_level_stats(2022) %>%
   group_by(game_id, slug_team) %>%
   mutate(stint_home = ifelse(slug_team == team_home, cumsum(msg_type == 8) + 1, NA),
          stint_away = ifelse(slug_team == team_away, cumsum(msg_type == 8) + 1, NA)) %>% #keep track of each time subs are made leading to a different 5 player stint

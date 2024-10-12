@@ -16,13 +16,13 @@
 ##Data Collection and Wrangling##
 #################################
 #################################
-
 library(tidyverse)
 library(hoopR)
 library(janitor)
 library(future)
 library(zoo)
-
+library(Matrix)
+library(glmnet)
 
 lineup_level_stats <- function(year){
   
@@ -60,7 +60,7 @@ lineup_level_stats <- function(year){
     distinct(game_id) %>%
     pull(game_id)
   
-  #few_games <- c(games[1:2], "0022200025")
+  few_games <- c(games[1:2], "0022200025")
   ##Pulls PBP data for all game ID's in the specified season (takes forever)
   plan(multicore)
   #nba_pbp_raw <- map_df(games, function_pbp)
@@ -508,6 +508,7 @@ lineup_level_stats <- function(year){
     ungroup() %>%
     mutate(garbage_time = ifelse(garbage_time == 1 & number_event < max_nongarbage, 0, garbage_time)) %>% #cant be garbage time when the event number is less than total number of non garbage time events (Check this though)
     select(-c(starts_with("lineup_start_"), max_nongarbage, opt2, order, locX, locY))
+  
   
   
   
