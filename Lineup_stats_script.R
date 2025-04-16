@@ -575,8 +575,8 @@ lineup_level_stats <- function(year){
 ##################
 # Building the adjusted RAPM Model
 ##################
-#pbp_final_gt <- readRDS("C:/Users/dhaks/OneDrive/Desktop/SMU/STAT 6341/pbp_final_gt.RDS")
-test <- lineup_level_stats(2022) %>%
+pbp_final_gt <- readRDS("C:/Users/dhaks/OneDrive/Desktop/SMU/STAT 6341/pbp_final_gt.RDS")
+test <- pbp_final_gt %>%
   group_by(game_id, slug_team) %>%
   mutate(stint_home = ifelse(slug_team == team_home, cumsum(msg_type == 8) + 1, NA),
          stint_away = ifelse(slug_team == team_away, cumsum(msg_type == 8) + 1, NA)) %>% #keep track of each time subs are made leading to a different 5 player stint
@@ -701,9 +701,9 @@ combined_lineups <- rbind(lineups_home_perspective %>%
                        names = c('DP1', 'DP2', 'DP3', 'DP4', 'DP5')) %>% 
   mutate(across(P1:P5, str_trim)) %>% 
   mutate(across(DP1:DP5, str_trim)) %>% 
-  mutate(netrt = (100/(poss_team + poss_opp))*(pts_team-pts_opp),
-         ORTG = (100/poss_team)*pts_team,
-         DRTG = (100/poss_opp)*pts_opp) %>% 
+  mutate(ORTG = (100/poss_team)*pts_team,
+         DRTG = (100/poss_opp)*pts_opp,
+         netrt = ORTG - DRTG) %>% 
   filter(!is.na(netrt)) %>% 
   filter(!is.infinite(netrt)) %>% 
   filter(!(is.na(ORTG_RA_opp) | is.na(ORTG_RA_team) |
